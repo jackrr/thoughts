@@ -5,9 +5,28 @@ const graphqlHTTP = require('express-graphql')
 const { createThought, thoughts, getThought } = require('./server/data/thoughts');
 
 var schema = buildSchema(`
-  type Thought {
-    id: String
+  interface Node {
+    id: ID!
+  }
+
+  type Thought implements Node {
+    id: ID!
     body: String
+  }
+
+  type Edge {
+    node: Node!
+    cursor: String!
+  }
+
+  type Page {
+    edges: [Edge]
+    pageInfo: PageInfo
+  }
+
+  type PageInfo {
+    endCursor: String
+    hasNextPage: Boolean
   }
 
   type Mutation {
@@ -34,6 +53,7 @@ var root = {
 
 const app = express()
 
+app.use('/', express.static('public'))
 app.use('/graphql', graphqlHTTP({
   schema,
   rootValue: root,
